@@ -1,0 +1,21 @@
+---
+title: "Statistical Theory and Modeling - Home Assignment - Part 1"
+author: ""
+format: pdf
+editor: visual
+---
+
+### Group number - 20
+
+| Name: Aparna Ramesh Pai
+| Email: aparnapai247\@gmail.com
+
+| Name: Chaithra Satheesh
+| Email: s.chaitra12\@gmail.com
+| 
+| Name: Chinthaka Chamil Prasanga Amarbandu
+| Email: guam8978\@student.su.se
+
+{{< pagebreak >}}
+
+## Problem 1 - Exponential distribution and Numerical integration
