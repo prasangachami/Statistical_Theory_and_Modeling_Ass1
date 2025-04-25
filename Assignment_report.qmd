@@ -19,3 +19,391 @@ editor: visual
 {{< pagebreak >}}
 
 ## Problem 1 - Exponential distribution and Numerical integration
+
+**1a. Simulate** $n = 10000$ random numbers from the exponential distribution with rate $\lambda = 2$ to verify that R is using the rate parameterization.
+
+The exponential distribution with rate $\lambda = 2$ has a theoretical mean, $\mu = \frac{1}{\lambda} = \frac{1}{2} = 0.5$
+
+```{r, include=FALSE}
+set.seed(0)
+rand_nums <- rexp(n = 10000, rate = 2)
+rand_nums_mean <- mean(rand_nums)
+print(rand_nums_mean)
+
+```
+
+The sample mean is `r rand_nums_mean` which is close to the theoretical value of 0.5, thus confirming rate parameterization in R.
+
+**1b. Simulate 200 random numbers from the** $X \sim \text{Expon}(\beta = 2)$ distribution. Plot histogram of draws (using 30 bins) and overlay the theoretical pdf for $\text{Expon} (\beta = 2)$ distribution as a curve.
+
+```{r, echo=FALSE}
+
+set.seed(0)
+rand_draws <- rexp(n=200, rate=1/2)
+hist(
+  rand_draws,
+  freq = FALSE,
+  breaks = 30,
+  main = "Histogram of 200 Exponential Draws with rate 0.5",
+  xlab = "x",
+  ylab = "Density"
+)
+
+x_vals <- seq(0, 10, length = 1000)
+pdf_vals <- dexp(x_vals, rate = 0.5)
+#lines(x_vals, pdf_vals, lwd = 2)
+lines(x_vals, pdf_vals, col = "blue", lwd = 2)
+```
+
+The Histogram closely follows the shape of the theoretical curve, confirming that the simulated data follows the expected behavior.
+
+**1c. Overlay two more pdf curves: one for** $\text{Expon} (\beta = 1)$ and other for $\text{Expon} (\beta = 3)$. Which of the three pdf curves fit the histogram data best? Why?
+
+```{r, echo=FALSE}
+
+hist(
+  rand_draws,
+  freq = FALSE,
+  breaks = 30,
+  main = "Histogram of 200 Exponential Draws with rate 0.5",
+  xlab = "x",
+  ylab = "Density"
+)
+
+x_vals <- seq(0, 10, length = 1000)
+pdf_vals <- dexp(x_vals, rate = 1/2)
+lines(x_vals, pdf_vals, col = "blue", lwd = 2)
+#rate = 1
+lines(x_vals, (dexp(x_vals, rate = 1)), col = "red", lwd = 2)
+
+#rate = 1/3
+lines(x_vals, (dexp(x_vals, rate = 1/3)), col = "green", lwd = 2)
+
+legend("topright", legend=c("rate = 1/2", "rate = 1", "rate = 1/3"),
+       col=c("blue", "red", "green"), lwd=2,  title = "PDF")
+
+```
+
+The PDF curve for $\text{Expon} (\beta = 2)$ distribution fits the histogram of data simulated from $X \sim \text{Expon} (\beta = 2)$ distribution best, as they both have the same rate: $1/2$. The curve with rate $1$ ($\beta = 1$) falls faster, underestimating the frequency of larger values, while the curve with rate $1/3$ ($\beta = 3$) falls more slowly and overestimates the probability of larger values.
+
+**1d. Plot the empirical cdf for** $n = 200$ observations simulated in 1b. Overlay the cdf from 3 distributions: $\text{Expon} (\beta = 1)$, $\text{Expon} (\beta = 2)$, $\text{Expon} (\beta = 3)$. Which distribution fits best?
+
+```{r, echo=FALSE}
+rand_draws_sorted <- sort(rand_draws)
+empirical_cdf <- ecdf(rand_draws_sorted)
+
+#ecdf_manual <- (1/200)*seq(1, 200)
+#print(ecdf_manual)
+
+plot(empirical_cdf,
+  xlab = "x",
+  ylab = "Cumulative Probability",
+  main = "Empirical vs Theoretical CDFs",
+  do.points = FALSE,
+  lwd =2,
+  col = "black"
+  
+)
+
+
+lines(x_vals, pexp(x_vals, rate = 1/2), col = "blue", lwd = 2)
+lines(x_vals, (pexp(x_vals, rate = 1)), col = "green", lwd = 2)
+lines(x_vals, (pexp(x_vals, rate = 1/3)), col = "red", lwd = 2)
+
+legend("bottomright",
+       legend = c("Empirical CDF", "Expon(β=1)", "Expon(β=2)", "Expon(β=3)"),
+       col = c("black", "green", "blue", "red"),
+       lwd = 2,
+       lty = c(1,1,1,1),
+       bty = "n")
+
+```
+
+The cdf from distribution $\text{Expon} (\beta = 2)$ matches the empirical CDF best, thus confirming previous conclusion.
+
+**1e. Compare sample median from** $n = 200$ observations to the theoretical medians for each of the above distributions. Explain both how: **- a sample median is defined** **- how a median of a statistical distribution is defined.**
+
+```{r, include=FALSE}
+rand_draws_median <- median(rand_draws)
+
+#median when Beta = 1
+median_beta_1 <- qexp(0.5, rate = 1)
+
+#median when Beta = 2
+median_beta_2 <- qexp(0.5, rate = 1/2)
+
+#median when Beta = 3
+median_beta_3 <- qexp(0.5, rate = 1/3)
+
+#print(rand_draws_median)
+#print(median_beta_1)
+#print(median_beta_2)
+#print(median_beta_3)
+
+```
+
+Sample median is the middle value in the sorted sample.
+
+Theoretical median for an exponential distribution is $\beta * \log(2)$.
+
+-   Sample median = `r rand_draws_median`
+-   Median ($\beta =1$)= `r median_beta_1`
+-   Median ($\beta = 2$)= `r median_beta_2`
+-   Median ($\beta = 3$)= `r median_beta_3`
+
+The sample median is closest to the theoretical for $\beta =2$.
+
+**1f. Verify by numerical integration that** $\text{Expon} (\beta = 2)$ density in R fulfills the required property of any density $\int_{-\infty}^{\infty} f(x)  dx = 1$.
+
+```{r, include=FALSE}
+dx = 0.0005
+upper_limit <- 100
+x_vals_int <- seq(0, upper_limit, by = dx)
+pdf_vals_int <- dexp(x_vals_int, rate = 1/2)
+areas <- pdf_vals_int*dx
+approx_integration <- sum(areas)
+#print(approx_integration)
+```
+
+The rectangle sum approximation resulted in a value of `r approx_integration`, which verifies the property of $\text{Expon} (\beta = 2)$ density that any probability density function must integrate to 1.
+
+**1g. Compute the expected value of the exponential distribution with** $\beta = 2$ using numerical integration. Verify this result using built in integration routine.
+
+```{r, include=FALSE}
+dx_2 = 0.05
+x_vals_int_2 <- seq(0, upper_limit, by = dx_2)
+pdf_vals_int_2 <- dexp(x_vals_int_2, rate = 1/2)
+expected_values <- x_vals_int_2 * pdf_vals_int_2
+exp_value_areas <- expected_values*dx_2
+approx_expected_values <- sum(exp_value_areas)
+#print(approx_expected_values)
+
+
+f_expected <- function(x){
+  x * dexp(x, rate = 1/2)
+}
+
+approx_integration_calculated <- integrate(f_expected, lower = 0, upper = Inf)
+#print(approx_integration_calculated$value)
+
+
+```
+
+The expected value of exponential distribution with $\beta = 2$ using numerical integration is `r approx_expected_values` and using the built in function *integrate* is `r approx_integration_calculated$value`, which are both close/equal to the theoretical mean $E(X) = \beta = 2$.
+
+
+## Problem 2 - Exponential distribution and Numerical integration
+
+**2a. Load dataset and store number of bugs in vector y. Plot a histogram of data and overlay the density of poisson distribution with** $\lambda = \bar{y}$.
+
+```{r, echo=FALSE}
+data=read.csv("https://github.com/StatisticsSU/STM/raw/main/assignment/bugs.csv",header =TRUE)
+y=data$nBugs# number of bugs, a vector with n = 91 observations
+
+lambda_estimate <- mean(y)
+data_var <- var(y)
+#print(lambda_estimate)
+
+hist(
+  y,20,
+  ylim = c(0, 0.2),
+  probability = TRUE,
+  main = "Histogram of Number of Bugs",
+  xlab = "Number of Bugs",
+  ylab = "Density"
+)
+
+x_vals <- seq(0, max(y))
+poisson_density <- dpois(x_vals, lambda = lambda_estimate)
+lines(x_vals, poisson_density, col = "blue",lwd = 2, lty = 1)
+
+
+```
+
+The Poisson model doesn't fit the data well. Poisson model assumes $Mean = Variance = \lambda$, which isn't the case with this data. It has a variance of `r data_var` which is much higher than the mean (`r lambda_estimate`). Thus the Poisson model underestimates the spread of the data.
+
+**2b. Add probability function from negative binomial model for three different** $r$ values: $r = 1$, $r = 3$, and $r = 100$. Which of these models do you prefer? Why? Which of the negative binomial models is closest to the Poisson model? Why?
+
+```{r, echo=FALSE}
+hist(
+  y,20,
+  ylim = c(0, 0.2),
+  probability = TRUE,
+  main = "Histogram of Number of Bugs",
+  xlab = "Number of Bugs",
+  ylab = "Density"
+)
+
+x_vals <- seq(0, max(y))
+poisson_density <- dpois(x_vals, lambda = lambda_estimate)
+lines(x_vals, poisson_density, col = "blue",lwd = 2, lty = 1)
+mu_estimate <- mean(y)
+nbinom_density_r1 <- dnbinom(x_vals, size = 1, mu = mu_estimate)
+lines(x_vals, nbinom_density_r1, col = "red",lwd = 2, lty = 2)
+
+nbinom_density_r3 <- dnbinom(x_vals, size = 3, mu = mu_estimate)
+lines(x_vals, nbinom_density_r3, col = "purple",lwd = 2, lty = 3)
+
+nbinom_density_r100 <- dnbinom(x_vals, size = 100, mu = mu_estimate)
+lines(x_vals, nbinom_density_r100, col = "green",lwd = 2, lty = 4)
+
+legend("topright", legend = c("Poisson (λ)", "Negative Binomial (r=1)", "Negative Binomial (r=3)", "Negative Binomial (r=100)"),
+       col = c("blue","red",  "purple", "green"), lwd = 2, lty = c(1, 2, 3, 4))
+
+#var_new <- lambda_estimate + ((lambda_estimate^2))
+```
+
+Probability density of the negative binomial model for $r=1$ fits the data well. This is because the parameter $r$ introduces an extra parameter in Poisson, allowing the variance to exceed the mean.
+
+Probability density of the negative binomial model for $r=100$ resembles the poisson model since Negative binomial approaches Poisson as $r \to \infty$.
+
+
+## Problem 3 - **Transforming a Variable**
+
+**3a. Simulating the Distribution of** $Y = \exp (X)$
+
+We start with the assumption that $$
+  X \sim N(0,1)  
+$$
+
+We are interested in the distribution of
+
+$$
+  Y = \exp(X)  
+$$
+
+In order to visualize this distribution, we simulate 10,000 draws from the normal distribution, transform them using the exponential function, and plot a histogram. It shows the simulated distribution of the random variable $Y = \exp(X)$.
+
+```{r, echo=FALSE}
+# Step 1: Simulate 10,000 normal random variables
+set.seed(123)
+x <- rnorm(10000)
+
+# Step 2: Transform using exponential
+y <- exp(x)
+
+# Step 3: Plot histogram with better readability
+hist(y, 
+     breaks = 50,                   # Reduce bin count for clarity
+     probability = TRUE,           # Scale to show probability density
+     xlim = c(0, 15),              # Focus on the range where most values fall
+     main = "Histogram of Y = exp(X)",
+     xlab = "Y",
+     col = "lightblue", 
+     border = "white")
+```
+
+If frequency distribution that approximates the shape of the log normal distribution Because
+
+$$
+If\quad X \sim N(\mu,\sigma^2) \quad Then 
+$$ $$
+ Y=\exp(X) \sim LogNormal(\mu,\sigma^2) \qquad Where\quad\mu = 0 , \sigma=1
+$$
+
+The histogram shows a strong right skewness with a peak near 1 and a long right tail. This matches the known shape of the log-normal distribution, which confirms that the exponential transformation of a normal variable results in a log-normal distribution.
+
+**3b. Deriving the PDF of Y and Overlaying the Theoretical Curve**
+
+We now derive the probability density function of $Y = exp(X)$ using the method of transformation. The theoretical PDF is worked out below.
+
+Let, $$
+X\sim N(\mu,\sigma^2)
+$$
+
+For a strictly increasing transformation, $Y = g(X) = exp(X)$ the PDF of y is given by, $$
+    f_y(y) = f_x(g^{-1}(y)) |\frac{d}{dy}g^{-1}(y)|
+$$
+
+$$
+  Here,\quad g^{-1}(y) = log(y) \quad and \quad \frac{d}{dy}g^{-1}(y) = \frac{1}{y} \qquad (Since \quad is\quad the\quad normal\quad density)
+$$
+
+$$
+f_x(x) = \frac{1}{\sqrt{2\pi}} exp(-\frac{1}{2}(x-\mu)^2) 
+$$ $$
+We\quad substitute\quad 2 = log(y) with \mu=0 , \quad hence\quad we\quad get
+$$ $$
+f_y(y) = \frac{1}{\sqrt{2\pi y}} exp(-\frac{1}{2}(log_y)^2)
+$$
+
+Now , we shall overlay this theoretical PDF onto the histogram. We obtain the following graph.
+
+```{r, echo=FALSE}
+# Problem 3b: Overlay theoretical PDF on histogram
+
+# Step 1: Simulate data (if not already done)
+set.seed(123)
+x <- rnorm(10000)
+y <- exp(x)
+
+# Step 2: Plot histogram
+hist(y,
+     breaks = 50,
+     probability = TRUE,
+     xlim = c(0, 15),
+     main = "Histogram of Y = exp(X) with Log-Normal PDF",
+     xlab = "Y",
+     col = "lightblue",
+     border = "white")
+
+# Step 3: Overlay log-normal theoretical PDF
+curve(dlnorm(x, meanlog = 0, sdlog = 1),
+      from = 0, to = 15,
+      col = "red",
+      lwd = 2,
+      add = TRUE)
+legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2)
+```
+
+The overlaid red curve represents the theoretical probability distribution function of a log normal distribution.
+
+**3c. Monte Carlo Estimation and Convergence of E\[Y\]**
+
+In this part, we estimate the expected value of Y = exp(X) , where X ∼ N (0,1) using Monte Carlo simulation. Since Y follows a log-normal distribution, we know from theory that,
+
+$$
+E(X) = exp(\mu + \frac{\sigma^2}{2})
+$$ $$
+= exp(0+\frac{1}{2})
+$$ $$
+= exp(0.5) \approx 1.6487
+$$
+
+To approximate this expectation, we simulate 10,000 random draws of X from the standard normal distribution, compute $Y = exp(X)$ and then calculate the sample mean $$
+  \hat\mu_m = \frac{1}{m}\sum^m_{i=1}Y_i
+$$ We compute $\hat\mu_m$ for increasing values of $m = 10, 20, 30 ......... 10,000$ and plot these estimates against $m$
+
+```{r, echo=FALSE}
+# Problem 3c: Monte Carlo estimate of E[Y] = E[exp(X)]
+
+set.seed(123)
+
+# Step 1: Simulate 10,000 values of X and compute Y = exp(X)
+x <- rnorm(10000)
+y <- exp(x)
+
+# Step 2: Compute running mean estimates
+sample_sizes <- 10:10000
+running_means <- cumsum(y)[sample_sizes] / sample_sizes
+
+# Step 3: Plot the running estimates
+plot(sample_sizes, running_means,
+     type = "l",
+     col = "blue",
+     lwd = 1.5,
+     xlab = "Sample Size (m)",
+     ylab = "Monte Carlo Estimate of E[Y]",
+     main = "Convergence of Monte Carlo Estimate of E[Y]",
+     ylim = c(1.4, 1.9))  # Zoom in on the region around exp(0.5)
+
+# Step 4: Add the true expected value as a red dashed line
+abline(h = exp(0.5), col = "red", lty = 2, lwd = 2)
+legend("topright",
+       legend = c("Estimate", "True E[Y] = exp(0.5)"),
+       col = c("blue", "red"),
+       lty = c(1, 2),
+       lwd = 2)
+```
+
+The resulting convergence graph shows that the estimates fluctuate for small sample sizes but eventually stabilize around the true value of $exp(0.5)$ confirming the convergence predicted by the Law of Large Numbers. The red dashed line in the plot represents the true expectation $E[Y] = exp(0.5)$ and the Monte Carlo estimates approach this line as the sample size increases.
