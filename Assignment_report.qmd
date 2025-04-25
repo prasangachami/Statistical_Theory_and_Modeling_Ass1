@@ -191,7 +191,7 @@ approx_integration_calculated <- integrate(f_expected, lower = 0, upper = Inf)
 
 The expected value of exponential distribution with $\beta = 2$ using numerical integration is `r approx_expected_values` and using the built in function *integrate* is `r approx_integration_calculated$value`, which are both close/equal to the theoretical mean $E(X) = \beta = 2$.
 
-## Problem 2 - Exponential distribution and Numerical integration
+## Problem 2 -  Probability models for count data
 
 **2a. Load dataset and store number of bugs in vector y. Plot a histogram of data and overlay the density of poisson distribution with** $\lambda = \bar{y}$.
 
