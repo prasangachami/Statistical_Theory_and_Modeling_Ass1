@@ -191,7 +191,6 @@ approx_integration_calculated <- integrate(f_expected, lower = 0, upper = Inf)
 
 The expected value of exponential distribution with $\beta = 2$ using numerical integration is `r approx_expected_values` and using the built in function *integrate* is `r approx_integration_calculated$value`, which are both close/equal to the theoretical mean $E(X) = \beta = 2$.
 
-
 ## Problem 2 - Exponential distribution and Numerical integration
 
 **2a. Load dataset and store number of bugs in vector y. Plot a histogram of data and overlay the density of poisson distribution with** $\lambda = \bar{y}$.
@@ -257,7 +256,6 @@ Probability density of the negative binomial model for $r=1$ fits the data well.
 
 Probability density of the negative binomial model for $r=100$ resembles the poisson model since Negative binomial approaches Poisson as $r \to \infty$.
 
-
 ## Problem 3 - **Transforming a Variable**
 
 **3a. Simulating the Distribution of** $Y = \exp (X)$
@@ -316,7 +314,7 @@ For a strictly increasing transformation, $Y = g(X) = exp(X)$ the PDF of y is gi
 $$
 
 $$
-  Here,\quad g^{-1}(y) = log(y) \quad and \quad \frac{d}{dy}g^{-1}(y) = \frac{1}{y} \qquad (Since \quad is\quad the\quad normal\quad density)
+  Here,\quad g^{-1}(y) = log(y) \quad and \quad \frac{d}{dy}g^{-1}(y) = \frac{1}{y} \qquad (Since \quad f_x(x)\quad is\quad the\quad normal\quad density)
 $$
 
 $$
